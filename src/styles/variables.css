@@ -2,9 +2,14 @@
   /* Color Variables */
   --color-main: #2B7FFF;
   --color-main-light: #EFF6FF;
+  --color-green: #008236;
+  --color-green-light: #F0FDF4;
+  --color-yellow: #A65F00;
+  --color-yellow-light: #FEFCE8;
+  --color-red: #C10007;
+  --color-red-light: #FEF2F2;
   --color-start: #08FF1D;
   --color-end: #FF0808;
-
 
   /* Gray Scale */
   --color-gray-100: #F9FAFB;
