@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
 
 import ChatIcon from "../../../assets/icon/chat.svg?react";
@@ -7,41 +7,39 @@ import MyIcon from "../../../assets/icon/my.svg?react";
 import SearchIcon from "../../../assets/icon/search.svg?react";
 
 /**
- * 하단 네비게이션 푸터. 홈 / 탐색 / 채팅 / 마이 탭 링크와 현재 탭 강조 표시.
+ * 하단 네비게이션 푸터. 홈 / 탐색 / 채팅 / 마이 탭 링크를 제공하며,
+ * 현재 경로(pathname)와 일치하는 탭만 강조 색으로 표시한다.
  *
- * @param {string} current - 현재 페이지에 해당하는 탭 식별자. 이 값과 일치하는 탭만 강조 색으로 표시됨.
- *   - "home"    : 홈 탭 강조
- *   - "search" : 탐색 탭 강조
- *   - "chat"   : 채팅 탭 강조
- *   - "mypage" : 마이 탭 강조
- *
- * @example
- * // 홈 페이지에서
- * <Footer current="home" />
+ * - pathname이 "/" → 홈 탭 강조
+ * - pathname이 "/search" → 탐색 탭 강조
+ * - pathname이 "/chat" → 채팅 탭 강조
+ * - pathname이 "/my-page" → 마이 탭 강조
  *
  * @example
- * // 탐색 페이지에서
- * <Footer current="search" />
+ * <Footer />
  */
-export default function FooterCopy({ current }: { current: string }) {
+export default function Footer() {
+  const location = useLocation();
+  const pathname = location.pathname;
+
   return (
     <Wrapper>
-      <NavButton to="/" $active={current === "home"}>
+      <NavButton to="/" $active={pathname === "/"}>
         <HomeIcon />
         <Title>홈</Title>
       </NavButton>
 
-      <NavButton to="/" $active={current === "search"}>
+      <NavButton to="/search" $active={pathname === "/search"}>
         <SearchIcon />
         <Title>탐색</Title>
       </NavButton>
 
-      <NavButton to="/" $active={current === "chat"}>
+      <NavButton to="/chat" $active={pathname === "/chat"}>
         <ChatIcon />
         <Title>채팅</Title>
       </NavButton>
 
-      <NavButton to="/" $active={current === "mypage"}>
+      <NavButton to="/my-page" $active={pathname === "/my-page"}>
         <MyIcon />
         <Title>마이</Title>
       </NavButton>
