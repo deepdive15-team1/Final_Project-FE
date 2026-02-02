@@ -1,8 +1,9 @@
 import { forwardRef, useCallback, useId } from "react";
 import styled, { css } from "styled-components";
+
 import SelectInput from "./SelectInput";
-import SelectOption from "./SelectOption";
 import type { SelectInputProps, SelectChangeEvent } from "./SelectInput";
+import SelectOption from "./SelectOption";
 import type { SelectOptionItem } from "./SelectOption";
 
 export type { SelectChangeEvent };
