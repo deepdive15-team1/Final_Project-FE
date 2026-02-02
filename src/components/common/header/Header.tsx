@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-
 import styled from "styled-components";
+
 import BackIcon from "../../../assets/icon/back.svg?react";
 
 /**
@@ -30,9 +30,9 @@ const Wrapper = styled.header`
   justify-content: flex-start;
   align-items: center;
   height: 60px;
+  padding: 0 8px;
   border-bottom: 2px solid var(--color-gray-200);
   background-color: var(--color-bg);
-  border: 2px solid red;
 `;
 
 const BackButton = styled.button`
@@ -41,8 +41,16 @@ const BackButton = styled.button`
   align-items: center;
   width: 48px;
   height: 48px;
-  color: var(----color-gray-600);
-  border: 2px solid blue;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-gray-600);
+  cursor: pointer;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
 `;
 
 const Title = styled.div`
@@ -50,6 +58,5 @@ const Title = styled.div`
   font-size: 20px;
   font-weight: 700;
   text-align: center;
-  color: var(----color-gray-600);
-  border: 2px solid green;
+  color: var(--color-gray-600);
 `;
