@@ -3,10 +3,10 @@ import globals from "globals";
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
-import { fixupPluginRules } from "@eslint/compat";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
 import prettierPluginRecommended from "eslint-plugin-prettier/recommended";
 import reactRresh from "eslint-plugin-react-refresh";
+import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -32,8 +32,9 @@ export default tseslint.config(
   {
     plugins: {
       react: reactPlugin,
-      "react-hooks": fixupPluginRules(reactHooksPlugin),
+      "react-hooks": reactHooksPlugin,
       "react-refresh": reactRresh,
+      import: importPlugin,
     },
     settings: { react: { version: "detect" } },
     rules: {
@@ -42,6 +43,39 @@ export default tseslint.config(
       ...reactHooksPlugin.configs.recommended.rules,
       "prettier/prettier": "warn",
       "react-refresh/only-export-components": "warn",
+
+      // TypeScript
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      // React
+      "react/react-in-jsx-scope": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
+
+      // Import 정렬
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            "parent",
+            "sibling",
+            "index",
+          ],
+          "newlines-between": "always",
+          alphabetize: { order: "asc" },
+        },
+      ],
+
+      // 일반
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "prefer-const": "error",
     },
   },
 );
