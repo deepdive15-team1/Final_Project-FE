@@ -8,7 +8,7 @@ import type {
   LoginResponse,
   SignupRequest,
   SignupResponse,
-} from "../../types/auth";
+} from "../../types";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 import { login as realLogin, signup as realSignup } from "./authApi";

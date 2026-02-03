@@ -6,4 +6,4 @@ export type {
   SignupRequest,
   SignupResponse,
   User,
-} from "./auth";
+} from "./api/auth";

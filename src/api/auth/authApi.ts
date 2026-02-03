@@ -3,7 +3,7 @@ import type {
   LoginResponse,
   SignupRequest,
   SignupResponse,
-} from "../../types/auth";
+} from "../../types";
 import { axiosInstance } from "../axiosInstance";
 
 export const signup = async (

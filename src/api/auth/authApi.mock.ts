@@ -3,7 +3,7 @@ import type {
   LoginResponse,
   SignupRequest,
   SignupResponse,
-} from "../../types/auth";
+} from "../../types";
 
 export const signup = async (
   _requestBody: SignupRequest,

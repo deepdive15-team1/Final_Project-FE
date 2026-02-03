@@ -24,7 +24,9 @@ export interface LoginRequest {
 export type LoginResponse = User;
 
 /** 회원가입 관련 타입 */
-export interface SignupRequest extends LoginRequest {
+export interface SignupRequest {
+  username: string;
+  password: string;
   name: string;
   ageGroup: AgeGroup;
   gender: Gender;
