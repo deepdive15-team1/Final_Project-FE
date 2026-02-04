@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import { login } from "../api/auth/authApi.index";
 import LockIcon from "../assets/icon/lock.svg?react";
 import UserIcon from "../assets/icon/my.svg?react";
 import LogoIcon from "../assets/logo.svg?react";
@@ -8,15 +10,50 @@ import Layout from "../components/Layout";
 import { Button } from "../components/common/button/Button";
 import Header from "../components/common/header/Header";
 import { Input } from "../components/common/input/Input";
+import { useAuthStore } from "../stores/authStore";
+import { isEmpty } from "../utils/validation";
+
+function validateLoginForm(fd: FormData): Record<string, string> {
+  const next: Record<string, string> = {};
+  const username = fd.get("username");
+  const password = fd.get("password");
+
+  if (isEmpty(username)) next.username = "아이디를 입력해주세요.";
+  if (isEmpty(password)) next.password = "비밀번호를 입력해주세요.";
+  return next;
+}
 
 export default function Login() {
+  const navigate = useNavigate();
+  const setUser = useAuthStore((state) => state.setUser);
+
   const pageHeader = <Header title="로그인" />;
   const userIcon = <UserIcon style={{ color: "var(--color-gray-600)" }} />;
   const lockIcon = <LockIcon style={{ color: "var(--color-gray-600)" }} />;
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [error, setError] = useState<Record<string, string>>({});
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log("submit");
+    const fd = new FormData(e.currentTarget);
+    const next = validateLoginForm(fd);
+    setError(next);
+    if (Object.keys(next).length > 0) return;
+
+    const requestBody = {
+      username: String(fd.get("username")),
+      password: String(fd.get("password")),
+    };
+
+    try {
+      const user = await login(requestBody);
+      setUser(user);
+      navigate("/");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "로그인에 실패했습니다.";
+      setError((prev) => ({ ...prev, form: message }));
+    }
   };
 
   return (
@@ -31,7 +68,7 @@ export default function Login() {
           startIcon={userIcon}
           placeholder="아이디를 입력해주세요"
           name="username"
-          // onChange={(e) => console.log(e.target.value)}
+          errorMessage={error.username}
         />
         <Input
           type="password"
@@ -39,9 +76,9 @@ export default function Login() {
           startIcon={lockIcon}
           placeholder="비밀번호를 입력해주세요"
           name="password"
-          // onChange={(e) => console.log(e.target.value)}
+          errorMessage={error.password}
         />
-
+        {error.form && <FormError>{error.form}</FormError>}
         <SubmitBtnWrapper>
           <Button type="submit" variant="primary" size="md" fullWidth>
             로그인
@@ -87,6 +124,13 @@ const SignupLavWrapper = styled.div`
   p {
     color: var(--color-gray-600);
   }
+`;
+
+const FormError = styled.p`
+  width: 100%;
+  font-size: 14px;
+  color: var(--color-error, #ff4d4f);
+  margin: 0;
 `;
 
 const SubmitBtnWrapper = styled.div`
