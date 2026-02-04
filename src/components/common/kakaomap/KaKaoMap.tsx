@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Map,
   MapMarker,
@@ -7,6 +7,7 @@ import {
 } from "react-kakao-maps-sdk";
 import styled from "styled-components";
 
+import CurrentLocationIcon from "../../../assets/mapicon/currentlocationbutton.svg?react";
 import { useGeolocation } from "../../../hooks/useGeolocation";
 
 export interface MarkerType {
@@ -64,13 +65,15 @@ interface KaKaoMapProps {
   lineOpacity?: number; // 불투명도
   // 현재 내 위치에 파란 점을 표시할지 여부
   showCurrentLocationMarker?: boolean;
+  // 버튼의 하단 위치 (기본값: "20px")
+  locationBtnBottom?: string;
 }
 
 export const KaKaoMap = ({
   center,
   markers = [],
   routePath,
-  height = "600px",
+  height = "100vh",
   level = 3,
   isCreateMode = false,
   onMapClick,
@@ -79,43 +82,30 @@ export const KaKaoMap = ({
   lineWeight = 5,
   lineOpacity = 0.8,
   showCurrentLocationMarker = false,
+  locationBtnBottom = "20px",
 }: KaKaoMapProps) => {
   // 내 위치 가져오기
   const { location, error, isLoading } = useGeolocation();
 
-  // 기본 좌표 (서울 시청)
-  const defaultCenter = { lat: 37.5665, lng: 126.978 };
-
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
 
-  const [myLocation, setMyLocation] = useState(defaultCenter);
+  const [myLocation, setMyLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
-  // '내 위치'가 한 번이라도 잡혔는지 체크하는 Ref (지도 튐 방지용)
-  const isLocationInitialized = useRef(false);
-
-  // Geolocation 업데이트 로직 (최초 1회만, 혹은 버튼 클릭 시에만)
-  useEffect(() => {
-    // 로딩 끝났고, 좌표 있고, 아직 초기화 안 됐고, 부모가 준 center가 없을 때만
-    if (
-      !isLoading &&
-      location.x &&
-      location.y &&
-      !isLocationInitialized.current &&
-      !center
-    ) {
-      const timerId = setTimeout(() => {
-        setMyLocation({ lat: location.y as number, lng: location.x as number });
-        isLocationInitialized.current = true;
-      }, 0);
-
-      // 클린업 함수 (컴포넌트 언마운트 시 타이머 취소)
-      return () => clearTimeout(timerId);
-    }
-  }, [isLoading, location.x, location.y, center]);
-
+  /**
+   * 중심 좌표 계산 우선순위
+   * 1순위: 부모가 내려준 center
+   * 2순위: 내 위치 찾기 버튼을 눌러서 업데이트된 myLocation
+   * 3순위: Geolocation으로 가져온 실시간 location (초기 렌더링용)
+   */
   const activeCenter = useMemo(() => {
-    return center || myLocation;
-  }, [center, myLocation]);
+    if (center) return center;
+    if (myLocation) return myLocation;
+
+    return { lat: location.y as number, lng: location.x as number };
+  }, [center, myLocation, location.x, location.y]);
 
   // 내 위치 찾기 버튼 핸들러
   const handleMyLocationClick = () => {
@@ -123,19 +113,18 @@ export const KaKaoMap = ({
     if (map && location.x && location.y) {
       // 카카오맵 명령어로 직접 이동
       map.panTo(new kakao.maps.LatLng(location.y, location.x));
+      // 버튼 클릭 시 state를 업데이트하여 activeCenter가 변경되도록 함
       setMyLocation({ lat: location.y, lng: location.x });
     } else {
-      // map 객체가 없어도 state 업데이트 시도
-      if (location.x && location.y) {
-        setMyLocation({ lat: location.y, lng: location.x });
-      } else {
-        alert("위치 정보를 가져올 수 없습니다.");
-      }
+      alert("위치 정보를 가져올 수 없습니다.");
     }
   };
 
-  // 로딩 처리: center도 없고 위치도 찾는 중이면 로딩 표시
-  if (isLoading && !center) {
+  // 로딩 처리: center props가 없는 경우, 좌표값(x, y)이 하나라도 없으면 무조건 로딩으로 간주
+
+  const isGeoLocationReady = !isLoading && location.x && location.y;
+
+  if (!center && !isGeoLocationReady) {
     return (
       <StatusContainer $height={height}>
         <p>현재 위치를 불러오는 중...</p>
@@ -204,7 +193,7 @@ export const KaKaoMap = ({
         {showCurrentLocationMarker && location.x && location.y && (
           <CustomOverlayMap
             position={{ lat: location.y as number, lng: location.x as number }}
-            zIndex={0} // 다른 핀들보다 뒤에 깔리도록 (방해 안 되게)
+            zIndex={0}
           >
             <MyLocationDot />
           </CustomOverlayMap>
@@ -212,21 +201,11 @@ export const KaKaoMap = ({
 
         {children}
       </Map>
-      <MyLocationBtn onClick={handleMyLocationClick}>
-        {/* 과녁 모양 아이콘 (SVG) */}
-        <svg
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="2" x2="12" y2="22" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-          <circle cx="12" cy="12" r="3" fill="currentColor" />
-        </svg>
+      <MyLocationBtn
+        onClick={handleMyLocationClick}
+        $bottom={locationBtnBottom}
+      >
+        <CurrentLocationIcon />
       </MyLocationBtn>
     </MapContainer>
   );
@@ -243,6 +222,7 @@ const StatusContainer = styled.div<{ $height: string; $isError?: boolean }>`
   height: ${(props) => props.$height};
   background-color: ${(props) =>
     props.$isError ? "var(--color-main-light)" : "var(--color-gray-100)"};
+  color: var(--color-text);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -251,14 +231,14 @@ const StatusContainer = styled.div<{ $height: string; $isError?: boolean }>`
 `;
 
 // 내 위치 찾기 버튼 스타일
-const MyLocationBtn = styled.button`
+const MyLocationBtn = styled.button<{ $bottom: string }>`
   position: absolute;
-  bottom: 20px;
+  bottom: ${(props) => props.$bottom};
   right: 20px;
   z-index: 10;
 
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
 
   background-color: white;
@@ -272,17 +252,18 @@ const MyLocationBtn = styled.button`
   color: var(--color-text);
 
   &:hover {
-    background-color: #f8f8f8;
-    color: #000;
+    background-color: var(--color-main-light);
   }
 
   &:active {
-    background-color: #eee;
+    background-color: var(--color-gray-200);
   }
 
-  /* 아이콘 색상 */
   svg {
-    color: var(--color-main);
+    min-width: 20px !important;
+    min-height: 20px !important;
+
+    color: var(--color-black);
   }
 `;
 
@@ -309,7 +290,7 @@ const MarkerContent = styled.div`
 const MyLocationDot = styled.div`
   width: 14px;
   height: 14px;
-  background-color: #4285f4;
+  background-color: var(--color-main);
   border: 2px solid white;
   border-radius: 50%;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
