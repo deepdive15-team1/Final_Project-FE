@@ -2,7 +2,7 @@
  * 인증(로그인/회원가입) 요청·응답 타입
  */
 
-export type AgeGroup = "10S" | "20S" | "30S" | "40S" | "50S";
+export type AgeGroup = "10S" | "20S" | "30S" | "40S" | "50S" | "60S";
 export type Gender = "MALE" | "FEMALE";
 
 export interface User {
