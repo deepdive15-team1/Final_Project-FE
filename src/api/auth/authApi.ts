@@ -25,3 +25,8 @@ export const login = async (
   );
   return response.data;
 };
+
+export const logout = async (): Promise<void> => {
+  await axiosInstance.post("/auth/logout");
+  return;
+};
