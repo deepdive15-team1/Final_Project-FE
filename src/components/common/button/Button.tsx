@@ -1,6 +1,7 @@
+import { forwardRef } from "react";
+
 import { IconWrapper, StyledButton } from "./Styles";
 import type { VariantType, SizeType } from "./Styles";
-import { forwardRef } from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: VariantType;
