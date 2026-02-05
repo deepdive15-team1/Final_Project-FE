@@ -16,7 +16,7 @@ export default function HomeHeader() {
 
         <UserGreeting>
           <h2>반갑습니다, {user?.name ?? "회원"}님</h2>
-          <p>오늘도 즐겁게 달려봅시다!</p>
+          <p>오늘도 즐겁게 달려보세요!</p>
         </UserGreeting>
       </LeftSection>
 
@@ -31,7 +31,7 @@ export default function HomeHeader() {
 
 const Wrapper = styled.header`
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   height: 110px;
   padding: 0 8px;
@@ -64,12 +64,12 @@ const UserGreeting = styled.div`
   padding-left: 8px;
 
   h2 {
-    font-size: 20px;
+    font-size: 16px;
     margin: 0;
   }
 
   p {
-    font-size: 14px;
+    font-size: 12px;
     margin: 0;
   }
 `;
