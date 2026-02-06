@@ -33,8 +33,6 @@ export interface SessionDetail extends SessionSummary {
   hostMannerTemp: number;
   participants: string[];
 
-  // [중요] API 명세에 '경로 좌표(routePolyline)'가 빠져 있습니다
-  // 일단 임의로 추가
   routeNodes?: { lat: number; lng: number }[];
 }
 
