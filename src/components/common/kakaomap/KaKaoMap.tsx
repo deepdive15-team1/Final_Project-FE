@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Map,
   MapMarker,
@@ -65,7 +65,7 @@ interface KaKaoMapProps {
   lineOpacity?: number; // 불투명도
   // 현재 내 위치에 파란 점을 표시할지 여부
   showCurrentLocationMarker?: boolean;
-  // 버튼의 하단 위치 (기본값: "20px")
+  // 버튼의 하단 위치
   locationBtnBottom?: string;
 }
 
@@ -85,46 +85,74 @@ export const KaKaoMap = ({
   locationBtnBottom = "20px",
 }: KaKaoMapProps) => {
   // 내 위치 가져오기
-  const { location, error, isLoading } = useGeolocation();
-
+  const { location, error } = useGeolocation();
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
 
-  const [myLocation, setMyLocation] = useState<{
+  const [initCenter, setInitCenter] = useState<{
     lat: number;
     lng: number;
-  } | null>(null);
-
-  /**
-   * 중심 좌표 계산 우선순위
-   * 1순위: 부모가 내려준 center
-   * 2순위: 내 위치 찾기 버튼을 눌러서 업데이트된 myLocation
-   * 3순위: Geolocation으로 가져온 실시간 location (초기 렌더링용)
-   */
-  const activeCenter = useMemo(() => {
+  } | null>(() => {
+    // 1순위: 부모가 준 center
     if (center) return center;
-    if (myLocation) return myLocation;
+    // 2순위: 이미 로드된 내 위치
+    if (location.x && location.y) {
+      return { lat: location.y as number, lng: location.x as number };
+    }
+    // 없으면 null
+    return null;
+  });
 
-    return { lat: location.y as number, lng: location.x as number };
-  }, [center, myLocation, location.x, location.y]);
+  // initCenter가 없고, 위치 정보가 뒤늦게 들어왔다면 바로 initCenter를 채워줌
+  if (!initCenter && location.x && location.y) {
+    setInitCenter({ lat: location.y as number, lng: location.x as number });
+  }
+
+  const centerLat = center?.lat;
+  const centerLng = center?.lng;
+
+  useEffect(() => {
+    if (map && centerLat !== undefined && centerLng !== undefined) {
+      map.panTo(new kakao.maps.LatLng(centerLat, centerLng));
+    }
+  }, [centerLat, centerLng, map]);
 
   // 내 위치 찾기 버튼 핸들러
-  const handleMyLocationClick = () => {
-    // 지도가 로드되어 있고, 내 위치 정보가 있을 때
-    if (map && location.x && location.y) {
-      // 카카오맵 명령어로 직접 이동
-      map.panTo(new kakao.maps.LatLng(location.y, location.x));
-      // 버튼 클릭 시 state를 업데이트하여 activeCenter가 변경되도록 함
-      setMyLocation({ lat: location.y, lng: location.x });
-    } else {
+  const handleMyLocationClick = useCallback(() => {
+    if (!location.x || !location.y) {
       alert("위치 정보를 가져올 수 없습니다.");
+      return;
     }
-  };
+    if (map) {
+      map.panTo(
+        new kakao.maps.LatLng(location.y as number, location.x as number),
+      );
+    }
+  }, [location.x, location.y, map]); // map과 location이 바뀔 때만 재생성
 
-  // 로딩 처리: center props가 없는 경우, 좌표값(x, y)이 하나라도 없으면 무조건 로딩으로 간주
+  // 지도 클릭 핸들러
+  const handleMapClick = useCallback(
+    (_t: kakao.maps.Map, mouseEvent: kakao.maps.event.MouseEvent) => {
+      if (isCreateMode && onMapClick) {
+        const lat = mouseEvent.latLng.getLat();
+        const lng = mouseEvent.latLng.getLng();
+        onMapClick(lat, lng);
+      }
+    },
+    [isCreateMode, onMapClick],
+  );
 
-  const isGeoLocationReady = !isLoading && location.x && location.y;
-
-  if (!center && !isGeoLocationReady) {
+  // 로딩 처리
+  if (!initCenter) {
+    // 에러 발생 시
+    if (error) {
+      return (
+        <StatusContainer $height={height} $isError>
+          <p>위치 정보를 가져올 수 없습니다.</p>
+          <ErrorMessage>{error}</ErrorMessage>
+        </StatusContainer>
+      );
+    }
+    // 로딩 중
     return (
       <StatusContainer $height={height}>
         <p>현재 위치를 불러오는 중...</p>
@@ -132,30 +160,14 @@ export const KaKaoMap = ({
     );
   }
 
-  // 에러 처리
-  if (error && !center) {
-    return (
-      <StatusContainer $height={height} $isError>
-        <p>위치 정보를 가져올 수 없습니다.</p>
-        <ErrorMessage>{error}</ErrorMessage>
-      </StatusContainer>
-    );
-  }
   return (
     <MapContainer $height={height}>
       <Map
-        center={activeCenter} // 지도의 중심 좌표
+        center={initCenter} // 지도의 중심 좌표
         style={{ width: "100%", height: height }} // 지도 크기
         level={level} // 지도 확대 레벨
-        isPanto={true}
         onCreate={setMap}
-        onClick={(_t, mouseEvent) => {
-          if (isCreateMode && onMapClick) {
-            const lat = mouseEvent.latLng.getLat();
-            const lng = mouseEvent.latLng.getLng();
-            onMapClick(lat, lng);
-          }
-        }}
+        onClick={handleMapClick}
       >
         {/* 마커 렌더링 */}
         {markers.map((marker) => (
@@ -167,11 +179,10 @@ export const KaKaoMap = ({
             draggable={marker.draggable}
             zIndex={marker.zIndex}
             onDragEnd={(mapMarker) => {
-              // 드래그가 끝나면 변경된 좌표를 부모에게 알려줌
-              if (marker.onDragEnd) {
-                const pos = mapMarker.getPosition();
-                marker.onDragEnd(pos.getLat(), pos.getLng());
-              }
+              marker.onDragEnd?.(
+                mapMarker.getPosition().getLat(),
+                mapMarker.getPosition().getLng(),
+              );
             }}
           >
             {/* content가 있을 때만 마커에 말풍선 표시 */}
@@ -278,13 +289,10 @@ const ErrorMessage = styled.p`
 const MarkerContent = styled.div`
   padding: 5px 10px;
   color: var(--color-text);
-  background-color: var(--color-bg);
-  border: 1px solid var(--color-gray-400);
-  border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translate(100%);
 `;
 
 const MyLocationDot = styled.div`
