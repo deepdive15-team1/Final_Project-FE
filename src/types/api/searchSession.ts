@@ -1,0 +1,54 @@
+// Enums
+export type GenderPolicy = "MALE_ONLY" | "FEMALE_ONLY" | "MIXED"; // MIXED는 '남녀무관'
+export type RunType = "RECOVERY" | "LSD" | "INTERVAL";
+
+export const GENDER_LABEL: Record<GenderPolicy, string> = {
+  MALE_ONLY: "남성 전용",
+  FEMALE_ONLY: "여성 전용",
+  MIXED: "남녀 무관",
+};
+
+// 지도 마커 조회용
+export interface MarkerResponse {
+  sessionId: number;
+  latitude: number;
+  longitude: number;
+}
+
+// 세션 요약 정보
+export interface SessionSummary {
+  id: number;
+  title: string;
+  startAt: string;
+  locationName: string;
+  targetDistanceKm: number;
+  avgPaceSec: number;
+  genderPolicy: GenderPolicy;
+  runType: RunType;
+}
+
+// 세션 상세 정보
+export interface SessionDetail extends SessionSummary {
+  hostName: string;
+  hostMannerTemp: number;
+  participants: string[];
+
+  // [중요] API 명세에 '경로 좌표(routePolyline)'가 빠져 있습니다
+  // 일단 임의로 추가
+  routeNodes?: { lat: number; lng: number }[];
+}
+
+// 검색 결과 페이징
+export interface SliceResponse<T> {
+  content: T[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+  };
+  first: boolean;
+  last: boolean;
+  size: number;
+  number: number;
+  numberOfElements: number;
+  empty: boolean;
+}
