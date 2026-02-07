@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import MyPage from "./pages/MyPage";
 import RunningDetailPage from "./pages/RunningDetailPage";
+import SearchListPage from "./pages/SearchListPage";
 import SearchPage from "./pages/SearchPage";
 import Signup from "./pages/Signup";
 
@@ -17,6 +18,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/my-page" element={<MyPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/search/list" element={<SearchListPage />} />
         <Route path="/search/:id" element={<RunningDetailPage />} />
       </Routes>
     </BrowserRouter>
