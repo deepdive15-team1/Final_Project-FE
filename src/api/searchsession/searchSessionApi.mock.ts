@@ -53,7 +53,7 @@ export const MOCK_DETAILS: Record<number, SessionDetail> = {
     hostName: "러닝조아",
     hostMannerTemp: 37.5,
     participants: ["철수", "영희", "민수"],
-    routeNodes: [
+    routePolyline: [
       { lat: 36.7945, lng: 127.1045 },
       { lat: 36.7955, lng: 127.1055 },
       { lat: 36.7935, lng: 127.1065 },
@@ -65,7 +65,7 @@ export const MOCK_DETAILS: Record<number, SessionDetail> = {
     hostName: "아침형인간",
     hostMannerTemp: 40.2,
     participants: ["영희", "지수"],
-    routeNodes: [
+    routePolyline: [
       { lat: 36.8015, lng: 127.1085 },
       { lat: 36.802, lng: 127.109 },
       { lat: 36.801, lng: 127.1095 },
@@ -76,7 +76,7 @@ export const MOCK_DETAILS: Record<number, SessionDetail> = {
     hostName: "마라톤풀코스",
     hostMannerTemp: 99.9,
     participants: ["철수", "민수", "동혁", "준호", "준수", "지호"],
-    routeNodes: [
+    routePolyline: [
       { lat: 36.79, lng: 127.102 },
       { lat: 36.791, lng: 127.1025 },
       { lat: 36.792, lng: 127.103 },
