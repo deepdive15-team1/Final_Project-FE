@@ -16,6 +16,8 @@ export const CardBase = styled.article`
   gap: 12px;
   transition: all 0.2s ease-in-out;
 
+  box-sizing: border-box;
+
   color: var(--color-text);
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.04);
 
