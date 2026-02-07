@@ -1,18 +1,20 @@
+import { useState } from "react";
 import styled from "styled-components";
 
-import type { ButtonSetProps } from "../../../types/models/buttonSet";
+import type { SingleSelectedButtonSetProps } from "../../../types/models/buttonSet";
 import { Button } from "../button/Button";
 
 export default function SingleSelectButtonSet({
   name,
   options,
-  value,
-  onChange,
   label,
   size,
   className,
   disabled = false,
-}: ButtonSetProps) {
+  defaultValue,
+}: SingleSelectedButtonSetProps) {
+  const [value, setValue] = useState(defaultValue ?? options[0]?.value ?? "");
+
   return (
     <Wrapper className={className} role="group" aria-label={name}>
       {label && <Label>{label}</Label>}
@@ -26,7 +28,7 @@ export default function SingleSelectButtonSet({
             rounded
             isSelected={option.value === value}
             disabled={disabled}
-            onClick={() => onChange(option.value)}
+            onClick={() => setValue(option.value)}
           >
             {option.label}
           </Button>

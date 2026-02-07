@@ -5,24 +5,20 @@ export interface ButtonOption {
   label: string;
 }
 
-export interface ButtonSetProps {
+export interface ButtonSetProps<T = unknown> {
   label: string;
   name: string;
-  options: ButtonOption[];
-  value: string;
-  onChange: (value: string) => void;
   size?: SizeType;
   className?: string;
   disabled?: boolean;
+  defaultValue?: T;
 }
 
-export interface StepperProps {
-  label: string;
-  name: string;
-  size?: SizeType;
-  className?: string;
-  disabled?: boolean;
+export interface SingleSelectedButtonSetProps extends ButtonSetProps<string> {
+  options: ButtonOption[];
+}
+
+export interface StepperProps extends ButtonSetProps<number> {
   min?: number;
   max?: number;
-  defaultValue?: number;
 }
