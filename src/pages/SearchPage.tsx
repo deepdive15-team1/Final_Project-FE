@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useCallback, useMemo, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { FILTER_OPTIONS } from "../api/searchsession/searchSessionApi";
 import {
   getMarkers,
   getSessionSummary,
@@ -16,6 +15,7 @@ import Footer from "../components/common/footer/Footer";
 import Header from "../components/common/header/Header";
 import { Input } from "../components/common/input/Input";
 import { KaKaoMap } from "../components/common/kakaomap/KaKaoMap";
+import { FILTER_OPTIONS } from "../components/runningdetail/FilterOptions";
 import type {
   MarkerResponse,
   SessionSummary,
@@ -36,65 +36,98 @@ export default function SearchPage() {
     null,
   );
 
-  // 마커 데이터 불러오기 (초기 로딩 & 필터 변경 시)
-  useEffect(() => {
-    const fetchMarkers = async () => {
-      try {
-        // 필터 State를 API 파라미터로 변환
-        const params = {
-          distance: activeFilters.has("distance") ? 3 : undefined,
-          date: activeFilters.has("date") ? "today" : undefined,
-          pace: activeFilters.has("pace") ? 600 : undefined,
-        };
+  const [mapInstance, setMapInstance] = useState<kakao.maps.Map | null>(null);
 
-        // API 호출
-        const data = await getMarkers(params);
-        setMarkerData(data);
-      } catch (error) {
-        console.error("마커 로딩 실패:", error);
-      }
-    };
+  const [searchKeyword, setSearchKeyword] = useState<string>("");
 
-    fetchMarkers();
-  }, [activeFilters]);
+  // 데이터 로딩 함수
+  const fetchSessions = async (map: kakao.maps.Map, filters: Set<string>) => {
+    try {
+      // 지도 좌표 가져오기
+      const bounds = map.getBounds();
+      const sw = bounds.getSouthWest();
+      const ne = bounds.getNorthEast();
 
-  // 특정 마커 클릭 시 요약 정보 불러오기(selectedId가 바뀔 때)
-  useEffect(() => {
-    const fetchSummary = async () => {
-      if (!selectedId) {
-        setSelectedSession(null);
-        return;
-      }
-      try {
-        const data = await getSessionSummary(selectedId);
-        setSelectedSession(data);
-      } catch (error) {
-        console.error("세션 상세 로딩 실패:", error);
-      }
-    };
+      // 파라미터 통합 (좌표 + 필터)
+      const params = {
+        // 좌표
+        minLng: sw.getLng(),
+        minLat: sw.getLat(),
+        maxLng: ne.getLng(),
+        maxLat: ne.getLat(),
 
-    fetchSummary();
-  }, [selectedId]);
+        // 필터
+        distance: filters.has("distance") ? 3 : undefined,
+        date: filters.has("date") ? "today" : undefined,
+        pace: filters.has("pace") ? 600 : undefined,
+      };
 
-  const handleToggleFilter = (id: string) => {
-    setActiveFilters((prev) => {
-      const newFilters = new Set(prev);
-      if (newFilters.has(id)) {
-        newFilters.delete(id); // 이미 있으면 선택 해제
-      } else {
-        newFilters.add(id); // 없으면 선택
-      }
-      return newFilters;
-    });
+      // API 호출
+      const data = await getMarkers(params);
+      setMarkerData(data);
+    } catch (error) {
+      console.error("데이터 로딩 실패:", error);
+    }
   };
 
-  //마커 데이터 변환 (KaKaoMap Format)
-  const mapMarkers = markerData.map((m) => ({
-    id: m.sessionId,
-    lat: m.latitude,
-    lng: m.longitude,
-    onClick: () => setSelectedId(m.sessionId),
-  }));
+  // 지도 이벤트 핸들러 (드래그, 줌, 생성 시)
+  const handleMapUpdate = useCallback(
+    (map: kakao.maps.Map) => {
+      setMapInstance(map); // 지도 객체 저장
+      fetchSessions(map, activeFilters); // 현재 필터 상태를 같이 넘김
+    },
+    [activeFilters],
+  ); // activeFilters가 바뀔 때마다 함수가 갱신되어 최신 필터값 유지
+
+  // 특정 마커 클릭 시 요약 정보 불러오기
+  const handleMarkerClick = async (id: number) => {
+    setSelectedId(id);
+
+    try {
+      const data = await getSessionSummary(id);
+      setSelectedSession(data);
+    } catch (err) {
+      console.error("세션 상세 로딩 실패", err);
+    }
+  };
+
+  // 검색 페이지로 이동
+  const goToSearchList = useCallback(() => {
+    if (!searchKeyword.trim()) return;
+    navigate(`/search/list?q=${encodeURIComponent(searchKeyword)}`);
+  }, [searchKeyword, navigate]);
+
+  // 엔터 키 감지 핸들러
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      goToSearchList();
+    }
+  };
+
+  // 필터 클릭 핸들러
+  const handleToggleFilter = (id: string) => {
+    const nextFilters = new Set(activeFilters);
+    if (nextFilters.has(id)) nextFilters.delete(id);
+    else nextFilters.add(id);
+
+    setActiveFilters(nextFilters);
+
+    // 지도가 로드되어 있다면, 현재 지도 좌표와 새로운 필터로 데이터 요청
+    if (mapInstance) {
+      fetchSessions(mapInstance, nextFilters);
+    }
+  };
+
+  //마커 데이터 변환
+
+  const mapMarkers = useMemo(() => {
+    return markerData.map((m) => ({
+      id: m.id,
+      lat: m.y,
+      lng: m.x,
+      onClick: () => handleMarkerClick(m.id),
+    }));
+  }, [markerData]);
 
   return (
     <Layout scrollable={false} header={pageHeader} footer={pageFooter}>
@@ -106,6 +139,9 @@ export default function SearchPage() {
           locationBtnBottom={selectedId ? "170px" : "80px"}
           isCreateMode={false}
           showCurrentLocationMarker={true}
+          onCreate={handleMapUpdate}
+          onDragEnd={handleMapUpdate}
+          onZoomChanged={handleMapUpdate}
         />
         {/* 상단 검색바 & 필터 Overlay */}
         <TopOverlay>
@@ -113,8 +149,17 @@ export default function SearchPage() {
             <Input
               variant="neutral"
               placeholder="지역 또는 크루 검색"
-              startIcon={<img src={searchIcon} alt="searchIcon"></img>}
-              className="search-input"
+              endIcon={
+                <img
+                  src={searchIcon}
+                  alt="searchIcon"
+                  style={{ cursor: "pointer" }}
+                  onClick={goToSearchList}
+                />
+              }
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </SearchArea>
 
@@ -128,7 +173,6 @@ export default function SearchPage() {
                   label={filter.label}
                   size="small"
                   clickable
-                  // 선택 여부에 따라 스타일 변경
                   variant="filled"
                   color={isSelected ? "primary" : "default"}
                   onClick={() => handleToggleFilter(filter.id)}
