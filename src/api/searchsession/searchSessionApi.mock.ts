@@ -7,9 +7,9 @@ import type {
 
 // 지도 마커 더미 데이터
 export const MOCK_MARKERS: MarkerResponse[] = [
-  { sessionId: 1, latitude: 36.7945, longitude: 127.1045 },
-  { sessionId: 2, latitude: 36.8015, longitude: 127.1085 },
-  { sessionId: 3, latitude: 36.79, longitude: 127.102 },
+  { id: 1, y: 36.7945, x: 127.1045, title: "천안아산역 퇴근 러닝" },
+  { id: 2, y: 36.8015, x: 127.1085, title: "불당 호수공원 모닝 조깅" },
+  { id: 3, y: 36.79, x: 127.102, title: "천안천 인터벌 빡런" },
 ];
 
 // 세션 요약 더미 데이터
@@ -88,41 +88,42 @@ export const MOCK_DETAILS: Record<number, SessionDetail> = {
   },
 };
 
-// 4. 검색 결과 더미 데이터
+// 검색 결과 더미 데이터
 export const MOCK_SEARCH_RESULT: SliceResponse<SessionSummary> = {
   content: [MOCK_SUMMARIES[1], MOCK_SUMMARIES[2], MOCK_SUMMARIES[3]],
-  pageable: { pageNumber: 0, pageSize: 10 },
+  pageable: {
+    pageNumber: 0,
+    pageSize: 10,
+    sort: { empty: true, sorted: false, unsorted: true },
+    offset: 0,
+    paged: true,
+    unpaged: false,
+  },
   first: true,
   last: true,
   size: 10,
   number: 0,
   numberOfElements: 3,
   empty: false,
+  sort: { empty: true, sorted: false, unsorted: true },
 };
-
-// 필터 옵션
-export const FILTER_OPTIONS = [
-  { id: "distance", label: "5km 이내", value: 5 },
-  { id: "date", label: "오늘", value: "today" },
-  { id: "pace", label: "페이스 6:00", value: 600 },
-];
 
 // 네트워크 지연 시뮬레이션 유틸
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * 1. 마커 조회 (필터링 시뮬레이션 포함)
+ * 마커 조회
  */
 export const getMarkers = async (params: {
   distance?: number;
   date?: string;
   pace?: number;
 }): Promise<MarkerResponse[]> => {
-  await delay(300); // 0.3초 딜레이
+  await delay(300); // 네트워크 지연
 
   // 서버 사이드 필터링 흉내내기
   return MOCK_MARKERS.filter((marker) => {
-    const detail = MOCK_SUMMARIES[marker.sessionId];
+    const detail = MOCK_SUMMARIES[marker.id];
     if (!detail) return false;
 
     // 거리 필터
@@ -142,7 +143,7 @@ export const getMarkers = async (params: {
 };
 
 /**
- * 2. 세션 요약 정보 조회 (지도 마커 클릭 시)
+ * 세션 요약 정보 조회 (지도 마커 클릭 시)
  */
 export const getSessionSummary = async (
   sessionId: number,
@@ -154,7 +155,7 @@ export const getSessionSummary = async (
 };
 
 /**
- * 3. 세션 상세 정보 조회 (상세 페이지 진입 시)
+ * 세션 상세 정보 조회 (상세 페이지 진입 시)
  */
 export const getSessionDetail = async (
   sessionId: number,
@@ -163,4 +164,70 @@ export const getSessionDetail = async (
   const detail = MOCK_DETAILS[sessionId];
   if (!detail) throw new Error("Session Detail Not Found");
   return detail;
+};
+
+/**
+ * 세션 검색 API
+ */
+export const searchSessions = async (
+  query: string,
+  page = 0,
+  size = 10,
+): Promise<SliceResponse<SessionSummary>> => {
+  await delay(300); // 네트워크 지연
+
+  // 더미 데이터 객체를 배열로 변환
+  const allSessions = Object.values(MOCK_SUMMARIES);
+
+  // 검색어 필터링 (검색어가 없으면 전체 반환)
+  const filteredSessions = query
+    ? allSessions.filter((session) => session.title.includes(query))
+    : allSessions;
+
+  // 페이징 처리
+  const start = page * size;
+  const end = start + size;
+  const slicedContent = filteredSessions.slice(start, end);
+  const hasNext = end < filteredSessions.length;
+
+  // 공통 정렬 객체
+  const sortInfo = { empty: true, sorted: false, unsorted: true };
+
+  return {
+    content: slicedContent,
+    pageable: {
+      pageNumber: page,
+      pageSize: size,
+      sort: sortInfo,
+      offset: start,
+      paged: true,
+      unpaged: false,
+    },
+    first: page === 0,
+    last: !hasNext,
+    size: size,
+    number: page,
+    numberOfElements: slicedContent.length,
+    empty: slicedContent.length === 0,
+    sort: sortInfo,
+  };
+};
+
+/**
+ * 세션 참여 신청
+ */
+export const joinSession = async (
+  sessionId: number,
+  messageToHost: string,
+): Promise<{ success: boolean; message: string }> => {
+  await delay(500); // 네트워크 지연
+
+  if (!messageToHost) {
+    throw new Error("호스트에게 보낼 메시지를 입력해주세요.");
+  }
+
+  return {
+    success: true,
+    message: "참여 신청이 완료되었습니다.",
+  };
 };

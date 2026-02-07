@@ -1,13 +1,17 @@
 import {
-  getMarkers as mockGetMarkers,
-  getSessionSummary as mockGetSessionSummary,
-  getSessionDetail as mockGetSessionDetail,
-} from "./searchSessionApi.mock";
-import {
   getMarkers as realGetMarkers,
   getSessionSummary as realGetSessionSummary,
   getSessionDetail as realGetSessionDetail,
-} from "./searchSessionApi.ts";
+  searchSessions as realSearchSessions,
+  joinSession as realJoinSession,
+} from "./searchSessionApi";
+import {
+  getMarkers as mockGetMarkers,
+  getSessionSummary as mockGetSessionSummary,
+  getSessionDetail as mockGetSessionDetail,
+  searchSessions as mockSearchSessions,
+  joinSession as mockJoinSession,
+} from "./searchSessionApi.mock";
 
 const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
@@ -29,3 +33,13 @@ export const getSessionSummary = isMock
 export const getSessionDetail = isMock
   ? mockGetSessionDetail
   : realGetSessionDetail;
+
+/**
+ * 세션 검색
+ */
+export const searchSessions = isMock ? mockSearchSessions : realSearchSessions;
+
+/**
+ * 참여 신청
+ */
+export const joinSession = isMock ? mockJoinSession : realJoinSession;
