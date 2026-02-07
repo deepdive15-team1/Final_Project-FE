@@ -67,6 +67,13 @@ interface KaKaoMapProps {
   showCurrentLocationMarker?: boolean;
   // 버튼의 하단 위치
   locationBtnBottom?: string;
+
+  // 지도가 처음 생성될 때
+  onCreate?: (map: kakao.maps.Map) => void;
+  // 드래그가 끝났을 때
+  onDragEnd?: (map: kakao.maps.Map) => void;
+  // 줌 레벨이 변경되었을 때
+  onZoomChanged?: (map: kakao.maps.Map) => void;
 }
 
 export const KaKaoMap = ({
@@ -83,6 +90,9 @@ export const KaKaoMap = ({
   lineOpacity = 0.8,
   showCurrentLocationMarker = false,
   locationBtnBottom = "20px",
+  onCreate,
+  onDragEnd,
+  onZoomChanged,
 }: KaKaoMapProps) => {
   // 내 위치 가져오기
   const { location, error } = useGeolocation();
@@ -141,6 +151,11 @@ export const KaKaoMap = ({
     [isCreateMode, onMapClick],
   );
 
+  const handleMapCreate = (mapInstance: kakao.maps.Map) => {
+    setMap(mapInstance);
+    if (onCreate) onCreate(mapInstance); // 부모에게 알림
+  };
+
   // 로딩 처리
   if (!initCenter) {
     // 에러 발생 시
@@ -166,8 +181,10 @@ export const KaKaoMap = ({
         center={initCenter} // 지도의 중심 좌표
         style={{ width: "100%", height: height }} // 지도 크기
         level={level} // 지도 확대 레벨
-        onCreate={setMap}
         onClick={handleMapClick}
+        onCreate={handleMapCreate} // 생성 시
+        onDragEnd={onDragEnd} // 드래그 종료 시
+        onZoomChanged={onZoomChanged} // 줌 변경 시
       >
         {/* 마커 렌더링 */}
         {markers.map((marker) => (
