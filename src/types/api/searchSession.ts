@@ -10,9 +10,10 @@ export const GENDER_LABEL: Record<GenderPolicy, string> = {
 
 // 지도 마커 조회용
 export interface MarkerResponse {
-  sessionId: number;
-  latitude: number;
-  longitude: number;
+  id: number;
+  title: string;
+  x: number;
+  y: number;
 }
 
 // 세션 요약 정보
@@ -36,17 +37,30 @@ export interface SessionDetail extends SessionSummary {
   routeNodes?: { lat: number; lng: number }[];
 }
 
+export interface SortObject {
+  empty: boolean;
+  sorted: boolean;
+  unsorted: boolean;
+}
+
 // 검색 결과 페이징
 export interface SliceResponse<T> {
   content: T[];
   pageable: {
     pageNumber: number;
     pageSize: number;
+    sort: SortObject;
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
   };
+
   first: boolean;
   last: boolean;
   size: number;
   number: number;
   numberOfElements: number;
   empty: boolean;
+
+  sort: SortObject;
 }
