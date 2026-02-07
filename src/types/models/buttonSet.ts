@@ -15,3 +15,14 @@ export interface ButtonSetProps {
   className?: string;
   disabled?: boolean;
 }
+
+export interface StepperProps {
+  label: string;
+  name: string;
+  size?: SizeType;
+  className?: string;
+  disabled?: boolean;
+  min?: number;
+  max?: number;
+  defaultValue?: number;
+}
