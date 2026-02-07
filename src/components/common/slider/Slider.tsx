@@ -57,7 +57,7 @@ const LabelWrapper = styled.div`
 
 const Label = styled.label`
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 600;
   color: var(--color-text);
   display: block;
   width: 100%;
