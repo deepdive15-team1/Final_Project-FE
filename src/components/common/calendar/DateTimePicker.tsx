@@ -88,7 +88,11 @@ export default function DateTimePicker({
       <input
         type="hidden"
         name={name}
-        value={selectedDateTime ? selectedDateTime.toISOString() : ""}
+        value={
+          selectedDateTime
+            ? format(selectedDateTime, "yyyy-MM-dd'T'HH:mm:ss")
+            : ""
+        }
         readOnly
         aria-hidden
       />
