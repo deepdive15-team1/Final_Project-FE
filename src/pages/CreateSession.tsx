@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import styled from "styled-components";
 
 import Layout from "../components/Layout";
 import Header from "../components/common/header/Header";
 import { KaKaoMap } from "../components/common/kakaomap/KaKaoMap";
-import SessionBottomSheet from "../components/session/SessionBottomSheet";
+import SessionBottomSheet, {
+  type SessionBottomSheetRef,
+} from "../components/session/SessionBottomSheet";
 
 export default function CreateSession() {
   const pageHeader = <Header title="러닝 세션 개설" />;
@@ -12,10 +14,12 @@ export default function CreateSession() {
   const [routeNodes, setRouteNodes] = useState<{ lat: number; lng: number }[]>(
     [],
   );
+  const bottomSheetRef = useRef<SessionBottomSheetRef>(null);
 
-  // 지도 클릭 핸들러 (used in commented map block)
+  // 지도 클릭 시 경로 추가 + 바텀시트 이외 영역 터치이므로 시트를 초기 높이로 접기
   const handleMapClick = (lat: number, lng: number) => {
     setRouteNodes((prev) => [...prev, { lat, lng }]);
+    bottomSheetRef.current?.collapse();
   };
 
   return (
@@ -42,7 +46,7 @@ export default function CreateSession() {
               : []
           }
         />
-        <SessionBottomSheet routeNodes={routeNodes} />
+        <SessionBottomSheet ref={bottomSheetRef} routeNodes={routeNodes} />
       </MapSheetWrapper>
     </Layout>
   );

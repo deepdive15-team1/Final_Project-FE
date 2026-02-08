@@ -1,4 +1,11 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import styled from "styled-components";
 
 import SessionForm from "./SessionForm";
@@ -11,9 +18,15 @@ export interface SessionBottomSheetProps {
   routeNodes?: { lat: number; lng: number }[];
 }
 
-export default function SessionBottomSheet({
-  routeNodes: _routeNodes = [],
-}: SessionBottomSheetProps) {
+export interface SessionBottomSheetRef {
+  /** 바텀시트를 드래그 인디케이터만 보이는 초기 높이로 접기 */
+  collapse: () => void;
+}
+
+const SessionBottomSheet = forwardRef<
+  SessionBottomSheetRef,
+  SessionBottomSheetProps
+>(function SessionBottomSheet({ routeNodes: _routeNodes = [] }, ref) {
   // 0단계. 드래그 시작 시점에서 시작 Y 좌표와 시작 높이를 저장 + isDragging 상태 변경
   const [sheetHeight, setSheetHeight] = useState(COLLAPSED_HEIGHT); // 현재 보이는 높이
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부(드래그 중일 때는 높이 변경 금지)
@@ -98,6 +111,12 @@ export default function SessionBottomSheet({
     };
   }, [isDragging, handleDragMove, handleDragEnd]);
 
+  // 바텀시트 이외 영역 클릭/터치 시 부모에서 호출하여 초기 높이로 접기
+  const collapse = useCallback(() => {
+    setSheetHeight(COLLAPSED_HEIGHT);
+  }, []);
+  useImperativeHandle(ref, () => ({ collapse }), [collapse]);
+
   return (
     <BottomSheet style={{ height: `${sheetHeight}px` }}>
       {/* 1단계. 초기에 DragIndicator만 보이도록 설정
@@ -112,7 +131,7 @@ export default function SessionBottomSheet({
       <SessionForm />
     </BottomSheet>
   );
-}
+});
 
 const BottomSheet = styled.div`
   position: absolute;
@@ -145,3 +164,5 @@ const DragIndicator = styled.div`
     cursor: grabbing;
   }
 `;
+
+export default SessionBottomSheet;
