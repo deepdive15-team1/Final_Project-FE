@@ -14,7 +14,7 @@ import {
   isEmpty,
   areEqual,
   isInRange1To7,
-  matchAlphaNum,
+  isValidPassword,
 } from "../utils/validation";
 
 function validateSignupForm(fd: FormData): Record<string, string> {
@@ -30,10 +30,14 @@ function validateSignupForm(fd: FormData): Record<string, string> {
 
   if (isEmpty(username)) next.username = "아이디를 입력해주세요.";
   if (isEmpty(password)) next.password = "비밀번호를 입력해주세요.";
+  else if (!isValidPassword(String(password), 8)) {
+    next.password =
+      "비밀번호는 영문, 숫자 포함 8자 이상이어야 합니다. (특수문자 가능)";
+  }
   if (isEmpty(passwordConfirm)) {
     next.passwordConfirm = "비밀번호를 입력해주세요.";
-  } else if (!matchAlphaNum(String(passwordConfirm), 8)) {
-    next.passwordConfirm = "비밀번호는 영문, 숫자 조합 8자 이상이어야 합니다.";
+  } else if (!isValidPassword(String(passwordConfirm), 8)) {
+    next.passwordConfirm = "비밀번호는 영문, 숫자 포함 8자 이상이어야 합니다.";
   } else if (!areEqual(password, passwordConfirm)) {
     next.passwordConfirm = "비밀번호가 일치하지 않습니다.";
   }
@@ -113,7 +117,7 @@ export default function Signup() {
         />
         <Input
           type="password"
-          label="비밀번호(영문, 숫자, 조합 8자 이상)"
+          label="비밀번호 확인(영문·숫자 포함 8자 이상)"
           placeholder="비밀번호를 입력해주세요"
           name="passwordConfirm"
           errorMessage={error.passwordConfirm}
