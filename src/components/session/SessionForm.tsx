@@ -172,7 +172,7 @@ export default function SessionForm({
           size="xs"
           className="capacity"
           disabled={false}
-          min={1}
+          min={2}
           max={10}
           defaultValue={1}
         />
