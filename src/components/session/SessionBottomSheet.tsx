@@ -9,13 +9,14 @@ import {
 import styled from "styled-components";
 
 import SessionForm from "./SessionForm";
+import type { LocationFormData } from "./SessionForm";
 
 const COLLAPSED_HEIGHT = 32; // 축소 상태 높이
 const MAX_HEIGHT = 420; // 최대 높이
 
 export interface SessionBottomSheetProps {
-  /** 지도에서 클릭한 경로 좌표. 장소명·목표거리 등 파생 데이터 전달용 */
-  routeNodes?: { lat: number; lng: number }[];
+  /** CreateSession에서 관리하는 위치·경로 데이터 (SessionForm 제출용, routeNodes 포함 파생) */
+  locationFormData?: LocationFormData;
 }
 
 export interface SessionBottomSheetRef {
@@ -26,7 +27,7 @@ export interface SessionBottomSheetRef {
 const SessionBottomSheet = forwardRef<
   SessionBottomSheetRef,
   SessionBottomSheetProps
->(function SessionBottomSheet({ routeNodes: _routeNodes = [] }, ref) {
+>(function SessionBottomSheet({ locationFormData }, ref) {
   // 0단계. 드래그 시작 시점에서 시작 Y 좌표와 시작 높이를 저장 + isDragging 상태 변경
   const [sheetHeight, setSheetHeight] = useState(COLLAPSED_HEIGHT); // 현재 보이는 높이
   const [isDragging, setIsDragging] = useState(false); // 드래그 중인지 여부(드래그 중일 때는 높이 변경 금지)
@@ -128,7 +129,7 @@ const SessionBottomSheet = forwardRef<
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
       />
-      <SessionForm />
+      <SessionForm locationFormData={locationFormData} />
     </BottomSheet>
   );
 });

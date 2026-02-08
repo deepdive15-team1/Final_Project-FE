@@ -14,17 +14,37 @@ import DateTimePicker from "../common/calendar/DateTimePicker";
 import { Input } from "../common/input/Input";
 import Slider from "../common/slider/Slider";
 
-function validateSessionForm(fd: FormData): Record<string, string> {
+/** CreateSession에서 관리하는 위치·경로 데이터 (폼 제출 시 사용) */
+export interface LocationFormData {
+  locationName: string;
+  locationX: number;
+  locationY: number;
+  routePolyline: { x: number; y: number }[];
+  targetDistanceKm: number;
+}
+
+function validateSessionForm(
+  fd: FormData,
+  locationFormData?: LocationFormData | null,
+): Record<string, string> {
   const next: Record<string, string> = {};
   const title = fd.get("title");
-  const locationName = fd.get("locationName");
+  const locationName =
+    locationFormData?.locationName ?? String(fd.get("locationName") ?? "");
 
   if (isEmpty(title)) next.title = "세션 타이틀을 입력해주세요.";
   if (isEmpty(locationName)) next.locationName = "모임장소를 입력해주세요.";
   return next;
 }
 
-export default function SessionForm() {
+export interface SessionFormProps {
+  /** 지도에서 선택한 위치·경로 (CreateSession 상태에서 내려옴) */
+  locationFormData?: LocationFormData | null;
+}
+
+export default function SessionForm({
+  locationFormData,
+}: SessionFormProps = {}) {
   const navigate = useNavigate();
 
   const markerIcon = <MarkerIcon />;
@@ -33,18 +53,23 @@ export default function SessionForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const next = validateSessionForm(fd);
+    const next = validateSessionForm(fd, locationFormData);
     setError(next);
     if (Object.keys(next).length > 0) return;
 
     const requestBody = {
       title: String(fd.get("title") ?? ""),
       runType: (fd.get("runType") as RunType) ?? "LSD",
-      locationName: String(fd.get("locationName") ?? ""),
-      locationX: Number(fd.get("locationX")) || 0,
-      locationY: Number(fd.get("locationY")) || 0,
-      routePolyline: [] as { x: number; y: number }[],
-      targetDistanceKm: Number(fd.get("targetDistanceKm")) || 0,
+      locationName:
+        locationFormData?.locationName ?? String(fd.get("locationName") ?? ""),
+      locationX:
+        locationFormData?.locationX ?? (Number(fd.get("locationX")) || 0),
+      locationY:
+        locationFormData?.locationY ?? (Number(fd.get("locationY")) || 0),
+      routePolyline: locationFormData?.routePolyline ?? [],
+      targetDistanceKm:
+        locationFormData?.targetDistanceKm ??
+        (Number(fd.get("targetDistanceKm")) || 0),
       avgPaceSec: Number(fd.get("avgPaceSec")) || 5 * 60,
       startAt: String(fd.get("startAt") ?? ""),
       capacity: Number(fd.get("capacity")) || 1,
@@ -92,7 +117,7 @@ export default function SessionForm() {
           defaultValue="LSD"
         />
 
-        {/* 모임장소 폼 컨트롤 - locationName */}
+        {/* 모임장소 폼 컨트롤 - locationName (CreateSession 상태에서 내려옴) */}
         <Input
           label="모임장소"
           name="locationName"
@@ -100,13 +125,14 @@ export default function SessionForm() {
           size="sm"
           className="locationName"
           disabled={false}
-          defaultValue=""
+          value={locationFormData?.locationName ?? ""}
+          readOnly
           placeholder="모임장소를 선택해주세요"
           startIcon={markerIcon}
           errorMessage={error.locationName}
         />
 
-        {/* 목표거리 폼 컨트롤 - targetDistanceKm*/}
+        {/* 목표거리 폼 컨트롤 - targetDistanceKm (경로 길이 자동 계산) */}
         <Input
           label="목표거리"
           name="targetDistanceKm"
@@ -114,7 +140,11 @@ export default function SessionForm() {
           size="sm"
           className="targetDistanceKm"
           disabled={true}
-          defaultValue=""
+          value={
+            locationFormData
+              ? `${locationFormData.targetDistanceKm.toFixed(2)} km`
+              : ""
+          }
           placeholder="목표거리는 자동으로 설정됩니다."
         />
 
