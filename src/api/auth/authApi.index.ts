@@ -11,8 +11,16 @@ import type {
 } from "../../types";
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
-import { login as realLogin, signup as realSignup } from "./authApi";
-import { login as mockLogin, signup as mockSignup } from "./authApi.mock";
+import {
+  login as realLogin,
+  signup as realSignup,
+  logout as realLogout,
+} from "./authApi";
+import {
+  login as mockLogin,
+  signup as mockSignup,
+  logout as mockLogout,
+} from "./authApi.mock";
 
 const isMock = import.meta.env.VITE_USE_MOCK === "true";
 
@@ -29,3 +37,9 @@ export const signup = isMock ? mockSignup : realSignup;
  * @returns {Promise<LoginResponse>} 사용자 정보
  */
 export const login = isMock ? mockLogin : realLogin;
+
+/**
+ * 로그아웃
+ * @returns {Promise<void>} 로그아웃 성공 여부
+ */
+export const logout = isMock ? mockLogout : realLogout;

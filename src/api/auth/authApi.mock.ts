@@ -26,3 +26,7 @@ export const login = async (
     mannerTemp: 36.5,
   };
 };
+
+export const logout = async (): Promise<void> => {
+  return;
+};

@@ -30,3 +30,12 @@ export function formatPaceDisplay(value: string): string {
   if (digits.length === 2) return `${digits}:`;
   return `${digits.slice(0, 2)}:${digits.slice(2)}`;
 }
+
+export function formatStartAt(isoString: string): string {
+  const d = new Date(isoString);
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+  const hours = d.getHours().toString().padStart(2, "0");
+  const minutes = d.getMinutes().toString().padStart(2, "0");
+  return `${month}/${day} ${hours}:${minutes}`;
+}
