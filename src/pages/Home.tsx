@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import CreateIcon from "../assets/icon/create.svg?react";
@@ -9,6 +10,7 @@ import HomeHeader from "../components/common/header/HomeHeader";
 import NearbyList from "../components/nearbyList/NearbyList";
 
 export default function Home() {
+  const navigate = useNavigate();
   const pageHeader = <HomeHeader />;
   const pageFooter = <Footer />;
 
@@ -16,7 +18,13 @@ export default function Home() {
     <Layout header={pageHeader} footer={pageFooter}>
       <Wrapper>
         <CreateBtnWrapper>
-          <Button startIcon={<CreateIcon />} endIcon={<PlusIcon />} fullWidth>
+          <Button
+            type="button"
+            onClick={() => navigate("/create-session")}
+            startIcon={<CreateIcon />}
+            endIcon={<PlusIcon />}
+            fullWidth
+          >
             러닝 세션 개설하기
           </Button>
         </CreateBtnWrapper>
