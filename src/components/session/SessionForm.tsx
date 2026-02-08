@@ -177,7 +177,7 @@ const Form = styled.form`
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  height: 580px;
+  height: 400px;
   box-sizing: border-box;
   background-color: var(--color-bg);
   overflow: hidden;
