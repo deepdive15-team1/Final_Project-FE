@@ -50,10 +50,9 @@ export default function CreateSession() {
     [routeNodes, startPlaceName],
   );
 
-  // 지도 클릭 시 경로 추가 + 바텀시트 이외 영역 터치이므로 시트를 초기 높이로 접기
+  // 지도 클릭 시 경로에 좌표 추가
   const handleMapClick = (lat: number, lng: number) => {
     setRouteNodes((prev) => [...prev, { lat, lng }]);
-    bottomSheetRef.current?.collapse();
   };
 
   // 시작점 마커 드래그 종료 시 경로의 첫 번째 좌표 갱신
