@@ -222,7 +222,7 @@ const FormControlWrapper = styled.div`
   justify-content: flex-start;
   align-items: left;
   gap: 30px;
-  padding: 20px;
+  padding: 0 20px;
   box-shadow: 0 4px 2px 0 rgba(0, 0, 0, 0.02);
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE, Edge */

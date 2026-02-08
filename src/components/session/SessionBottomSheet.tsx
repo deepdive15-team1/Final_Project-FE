@@ -125,10 +125,12 @@ const SessionBottomSheet = forwardRef<
        * -> 높이 값이 바뀌면, 브라우저는 자동으로 렌더링을 다시 함
        * -> 이때 드래그 핸들러가 다시 호출되어 높이 변경 로직이 실행됨
        */}
-      <DragIndicator
+      <DragHandleArea
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
-      />
+      >
+        <DragIndicator />
+      </DragHandleArea>
       <SessionForm locationFormData={locationFormData} />
     </BottomSheet>
   );
@@ -154,16 +156,26 @@ const BottomSheet = styled.div`
   overflow-x: hidden;
 `;
 
+const DragHandleArea = styled.div`
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: grab;
+  &:active {
+    cursor: grabbing;
+  }
+  // border: 2px solid red;
+`;
+
 const DragIndicator = styled.div`
   width: 40px;
   height: 4px;
   background-color: var(--color-gray-400);
   border-radius: 2px;
-  cursor: grab;
-  flex-shrink: 0;
-  &:active {
-    cursor: grabbing;
-  }
+  pointer-events: none;
 `;
 
 export default SessionBottomSheet;
