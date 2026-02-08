@@ -48,7 +48,7 @@ export default function Stepper({
           onClick={() => setValue((prev) => Math.min(max, prev + 1))}
           iconOnly
         >
-          <PlusIcon />
+          <PlusIcon style={{ color: "var(--color-text)" }} />
         </Button>
       </StepperWrapper>
     </Wrapper>
