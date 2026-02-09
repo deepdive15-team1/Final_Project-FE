@@ -50,6 +50,19 @@ function validateSessionForm(
     }
   }
 
+  // 일정: 현재 시간으로부터 20분 이후만 허용
+  const startAtRaw = fd.get("startAt");
+  if (startAtRaw && typeof startAtRaw === "string") {
+    const startAtDate = new Date(startAtRaw);
+    const minAllowed = Date.now() + 20 * 60 * 1000;
+    if (startAtDate.getTime() < minAllowed) {
+      const prev = next.form ?? "";
+      next.form = prev
+        ? `${prev}\n일정은 현재 시간으로부터 20분 이후로 선택해 주세요.`
+        : "일정은 현재 시간으로부터 20분 이후로 선택해 주세요.";
+    }
+  }
+
   return next;
 }
 
