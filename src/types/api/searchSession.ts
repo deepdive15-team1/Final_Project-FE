@@ -34,7 +34,7 @@ export interface SessionDetail extends SessionSummary {
   hostMannerTemp: number;
   participants: string[];
 
-  routePolyline?: { lat: number; lng: number }[];
+  routePolyline?: { x: number; y: number }[];
 }
 
 export interface SortObject {

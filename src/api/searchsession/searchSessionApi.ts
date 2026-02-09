@@ -8,7 +8,6 @@ import { axiosInstance } from "../axiosInstance";
 
 /**
  * 지도 세션 마커 조회
- * GET /sessions/search/markers?leftX={}&leftY={}&rightX={}&rightY={}
  */
 export const getMarkers = async (params: {
   minLng: number;
@@ -32,7 +31,6 @@ export const getMarkers = async (params: {
 
 /**
  * 마커 세션 요약 정보 조회
- * GET /sessions/{sessionId}/summary
  */
 export const getSessionSummary = async (
   sessionId: number,
@@ -45,7 +43,6 @@ export const getSessionSummary = async (
 
 /**
  * 세션 상세보기
- * GET /sessions/{sessionId}
  */
 export const getSessionDetail = async (
   sessionId: number,
@@ -58,7 +55,6 @@ export const getSessionDetail = async (
 
 /**
  * 러닝 이름으로 검색
- * GET /sessions/search?q={sessionName}
  */
 export const searchSessions = async (
   query: string,
@@ -80,7 +76,6 @@ export const searchSessions = async (
 
 /**
  * 러닝 참여
- * POST /sessions/{sessionId}/join
  */
 export const joinSession = async (
   sessionId: number,

@@ -9,7 +9,15 @@ interface Props {
 }
 
 export default function MapSection({ session }: Props) {
-  const routePath = useMemo(() => session.routePolyline || [], [session]);
+  const routePath = useMemo(() => {
+    if (!session.routePolyline) return [];
+
+    // x(경도) -> lng, y(위도) -> lat 매핑
+    return session.routePolyline.map((node) => ({
+      lat: node.y,
+      lng: node.x,
+    }));
+  }, [session]);
   const hasRoute = routePath.length > 0;
 
   // 마커 생성 로직 (지도 컴포넌트용)
