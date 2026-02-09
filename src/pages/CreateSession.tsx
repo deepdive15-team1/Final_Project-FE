@@ -51,9 +51,9 @@ export default function CreateSession() {
   );
 
   // 지도 클릭 시 경로에 좌표 추가
-  const handleMapClick = (lat: number, lng: number) => {
+  const handleMapClick = useCallback((lat: number, lng: number) => {
     setRouteNodes((prev) => [...prev, { lat, lng }]);
-  };
+  }, []);
 
   // 시작점 마커 드래그 종료 시 경로의 첫 번째 좌표 갱신
   const handleStartMarkerDragEnd = useCallback((lat: number, lng: number) => {
@@ -61,6 +61,25 @@ export default function CreateSession() {
       prev.length ? [{ lat, lng }, ...prev.slice(1)] : [{ lat, lng }],
     );
   }, []);
+
+  // 마커 배열 참조 안정화 (지도 불필요 리렌더 방지)
+  const markers = useMemo(
+    () =>
+      routeNodes[0]
+        ? [
+            {
+              id: "start" as const,
+              lat: routeNodes[0].lat,
+              lng: routeNodes[0].lng,
+              draggable: true,
+              onDragEnd: handleStartMarkerDragEnd,
+            },
+          ]
+        : [],
+    [routeNodes, handleStartMarkerDragEnd],
+  );
+
+  const routePath = routeNodes.length >= 2 ? routeNodes : undefined;
 
   return (
     <Layout header={pageHeader} scrollable={false}>
@@ -71,21 +90,8 @@ export default function CreateSession() {
           locationBtnBottom="620px"
           isCreateMode={true}
           onMapClick={handleMapClick}
-          routePath={routeNodes.length >= 2 ? routeNodes : undefined}
-          markers={
-            routeNodes[0]
-              ? [
-                  {
-                    // 시작점 마커 (말풍선 없음, 드래그로 위치 이동 가능)
-                    id: "start",
-                    lat: routeNodes[0].lat,
-                    lng: routeNodes[0].lng,
-                    draggable: true,
-                    onDragEnd: handleStartMarkerDragEnd,
-                  },
-                ]
-              : []
-          }
+          routePath={routePath}
+          markers={markers}
         />
         <SessionBottomSheet
           ref={bottomSheetRef}
