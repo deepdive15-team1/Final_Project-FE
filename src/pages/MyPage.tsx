@@ -77,7 +77,7 @@ export default function MyPage() {
     ) {
       navigate(`/manage/${sessionId}/attendance`);
     } else {
-      // 3. 아직 시작 전(OPEN, CLOSED)이라면 -> 신청자 관리 페이지(ManagePage)로 이동
+      // 아직 시작 전(OPEN, CLOSED)이라면 -> 신청자 관리 페이지(ManagePage)로 이동
       navigate(`/manage/${sessionId}`);
     }
   };
