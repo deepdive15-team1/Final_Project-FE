@@ -35,3 +35,10 @@ export function matchAlphaNum(
   const patternOk = /^[a-zA-Z0-9]+$/.test(trimmed);
   return lengthOk && patternOk;
 }
+
+/** 비밀번호: 최소 길이 + 영문·숫자 각 1자 이상 (특수문자 허용) */
+export function isValidPassword(value: string, minLen: number): boolean {
+  const trimmed = value.trim();
+  if (trimmed.length < minLen) return false;
+  return /[a-zA-Z]/.test(trimmed) && /\d/.test(trimmed);
+}
