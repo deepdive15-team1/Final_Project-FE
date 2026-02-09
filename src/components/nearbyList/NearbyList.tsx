@@ -78,7 +78,11 @@ export default function NearbyList() {
           sessions &&
           sessions.length > 0 &&
           sessions.map((session) => (
-            <NearbyItem key={session.id} session={session} />
+            <NearbyItem
+              key={session.id}
+              session={session}
+              onClick={() => navigate(`/search/${session.id}`)}
+            />
           ))}
       </ListWrapper>
     </SearchListWrapper>
