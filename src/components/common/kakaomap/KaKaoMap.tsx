@@ -95,7 +95,7 @@ export const KaKaoMap = ({
   onZoomChanged,
 }: KaKaoMapProps) => {
   // 내 위치 가져오기
-  const { location, error } = useGeolocation();
+  const { location, error, refetch } = useGeolocation();
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
 
   const [initCenter, setInitCenter] = useState<{
@@ -128,16 +128,16 @@ export const KaKaoMap = ({
 
   // 내 위치 찾기 버튼 핸들러
   const handleMyLocationClick = useCallback(() => {
-    if (!location.x || !location.y) {
-      alert("위치 정보를 가져올 수 없습니다.");
-      return;
-    }
-    if (map) {
+    refetch();
+
+    if (location.x && location.y && map) {
       map.panTo(
         new kakao.maps.LatLng(location.y as number, location.x as number),
       );
+    } else if (!location.x && !location.y) {
+      alert("위치 정보를 가져올 수 없습니다.");
     }
-  }, [location.x, location.y, map]); // map과 location이 바뀔 때만 재생성
+  }, [location.x, location.y, map, refetch]);
 
   // 지도 클릭 핸들러
   const handleMapClick = useCallback(
