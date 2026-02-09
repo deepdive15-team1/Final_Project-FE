@@ -1,4 +1,10 @@
-import { useState, useCallback, useMemo, type KeyboardEvent } from "react";
+import {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  type KeyboardEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -27,6 +33,7 @@ export default function SearchPage() {
   const pageFooter = <Footer />;
 
   const navigate = useNavigate();
+  const lastParamsRef = useRef<string>("");
 
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -41,43 +48,65 @@ export default function SearchPage() {
   const [searchKeyword, setSearchKeyword] = useState<string>("");
 
   // 데이터 로딩 함수
-  const fetchSessions = async (map: kakao.maps.Map, filters: Set<string>) => {
-    try {
-      // 지도 좌표 가져오기
-      const bounds = map.getBounds();
-      const sw = bounds.getSouthWest();
-      const ne = bounds.getNorthEast();
+  const fetchSessions = useCallback(
+    async (map: kakao.maps.Map, filters: Set<string>) => {
+      if (!map) return;
 
-      // 파라미터 통합 (좌표 + 필터)
-      const params = {
-        // 좌표
-        minLng: sw.getLng(),
-        minLat: sw.getLat(),
-        maxLng: ne.getLng(),
-        maxLat: ne.getLat(),
+      try {
+        // 지도 좌표 가져오기
+        const bounds = map.getBounds();
+        const sw = bounds.getSouthWest();
+        const ne = bounds.getNorthEast();
 
-        // 필터
-        distance: filters.has("distance") ? 3 : undefined,
-        date: filters.has("date") ? "today" : undefined,
-        pace: filters.has("pace") ? 600 : undefined,
-      };
+        // 파라미터 통합 (좌표 + 필터)
+        const params = {
+          // 좌표
+          minLng: sw.getLng(),
+          minLat: sw.getLat(),
+          maxLng: ne.getLng(),
+          maxLat: ne.getLat(),
 
-      // API 호출
-      const data = await getMarkers(params);
-      setMarkerData(data);
-    } catch (error) {
-      console.error("데이터 로딩 실패:", error);
-    }
-  };
+          // 필터
+          distance: filters.has("distance") ? 3 : undefined,
+          date: filters.has("date") ? "today" : undefined,
+          pace: filters.has("pace") ? 600 : undefined,
+        };
 
-  // 지도 이벤트 핸들러 (드래그, 줌, 생성 시)
-  const handleMapUpdate = useCallback(
-    (map: kakao.maps.Map) => {
-      setMapInstance(map); // 지도 객체 저장
-      fetchSessions(map, activeFilters); // 현재 필터 상태를 같이 넘김
+        // 기존 요청과 같다면 API 요청 하지 않음
+        const currentParamsStr = JSON.stringify(params);
+        if (lastParamsRef.current === currentParamsStr) {
+          return;
+        }
+
+        // 새로운 요청이라면 기억해두고 진행
+        lastParamsRef.current = currentParamsStr;
+
+        // API 호출
+        const data = await getMarkers(params);
+        setMarkerData(data);
+      } catch (error) {
+        console.error("데이터 로딩 실패:", error);
+      }
     },
-    [activeFilters],
-  ); // activeFilters가 바뀔 때마다 함수가 갱신되어 최신 필터값 유지
+    [],
+  );
+
+  // 지도 생성 시 딱 한 번 실행 (State 저장)
+  const handleCreate = useCallback(
+    (map: kakao.maps.Map) => {
+      setMapInstance(map);
+      fetchSessions(map, activeFilters);
+    },
+    [fetchSessions, activeFilters],
+  );
+
+  // 드래그/줌 종료 이벤트 핸들러 (State 저장 없이 데이터만 요청)
+  const handleMapEvent = useCallback(
+    (map: kakao.maps.Map) => {
+      fetchSessions(map, activeFilters);
+    },
+    [activeFilters, fetchSessions],
+  );
 
   // 특정 마커 클릭 시 요약 정보 불러오기
   const handleMarkerClick = async (id: number) => {
@@ -139,9 +168,9 @@ export default function SearchPage() {
           locationBtnBottom={selectedId ? "170px" : "80px"}
           isCreateMode={false}
           showCurrentLocationMarker={true}
-          onCreate={handleMapUpdate}
-          onDragEnd={handleMapUpdate}
-          onZoomChanged={handleMapUpdate}
+          onCreate={handleCreate}
+          onDragEnd={handleMapEvent}
+          onZoomChanged={handleMapEvent}
         />
         {/* 상단 검색바 & 필터 Overlay */}
         <TopOverlay>

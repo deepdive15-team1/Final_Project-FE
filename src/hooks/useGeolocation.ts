@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface LocationType {
   x: number | null;
@@ -9,6 +9,7 @@ interface GeolocationResult {
   location: LocationType;
   error: string | null;
   isLoading: boolean;
+  refetch: () => void;
 }
 
 export const useGeolocation = (
@@ -27,29 +28,46 @@ export const useGeolocation = (
   );
   const [isLoading, setIsLoading] = useState<boolean>(isSupported);
 
-  // 성공 핸들러: 'GeolocationPosition' 타입 사용
-  const handleSuccess = (pos: GeolocationPosition) => {
-    const { latitude, longitude } = pos.coords;
-
-    setLocation({
-      x: longitude, // x = 경도
-      y: latitude, // y = 위도
-    });
-    setIsLoading(false);
-  };
-  // 에러 핸들러: 'GeolocationPositionError' 타입 사용
-  const handleError = (err: GeolocationPositionError) => {
-    setError(err.message);
-    setIsLoading(false);
-  };
+  const optionsRef = useRef(options);
 
   useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
+  const getLocation = useCallback(() => {
     if (!isSupported) return;
 
     const { geolocation } = navigator;
 
-    geolocation.getCurrentPosition(handleSuccess, handleError, options);
-  }, [options, isSupported]);
+    // 성공 핸들러
+    const handleSuccess = (pos: GeolocationPosition) => {
+      const { latitude, longitude } = pos.coords;
+      setLocation({
+        x: longitude,
+        y: latitude,
+      });
+      setIsLoading(false);
+    };
 
-  return { location, error, isLoading };
+    // 에러 핸들러
+    const handleError = (err: GeolocationPositionError) => {
+      setError(err.message);
+      setIsLoading(false);
+    };
+
+    // 실제 요청 수행
+    // options는 의존성 배열에서 제외하여 무한 렌더링 방지
+    geolocation.getCurrentPosition(
+      handleSuccess,
+      handleError,
+      optionsRef.current,
+    );
+  }, [isSupported]);
+
+  // 마운트 시 최초 1회 실행
+  useEffect(() => {
+    getLocation();
+  }, [getLocation]);
+
+  return { location, error, isLoading, refetch: getLocation };
 };
