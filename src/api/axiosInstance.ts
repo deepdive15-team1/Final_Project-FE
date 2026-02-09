@@ -4,6 +4,7 @@ const AUTH_ERROR_KEY = "authErrorMessage";
 
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL, // 추후 .env 설정
+  withCredentials: true,
   timeout: 10000,
   headers: {
     "Content-type": "application/json",

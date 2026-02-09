@@ -9,12 +9,14 @@ interface HistoryRunItemProps {
   date: string;
   title: string;
   isCompleted: boolean;
+  onClick?: () => void;
 }
 
 export default function HistoryRunItem({
   date,
   title,
   isCompleted,
+  onClick,
 }: HistoryRunItemProps) {
   const displayDate = date.slice(5).replace("-", ".");
 
@@ -36,6 +38,7 @@ export default function HistoryRunItem({
       <Button
         variant="outlinePrimary"
         size="sm"
+        onClick={onClick}
         style={{ width: "fit-content", fontSize: "12px", padding: "0 12px" }}
       >
         평가하기

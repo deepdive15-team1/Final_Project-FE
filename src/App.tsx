@@ -4,11 +4,14 @@ import "./App.css";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CreateSession from "./pages/CreateSession";
 import Home from "./pages/Home";
+import HostEvaluationPage from "./pages/HostEvaluationPage";
 import Login from "./pages/Login";
+import ManagePage from "./pages/ManagePage";
 import MyPage from "./pages/MyPage";
 import RunningDetailPage from "./pages/RunningDetailPage";
 import SearchListPage from "./pages/SearchListPage";
 import SearchPage from "./pages/SearchPage";
+import SessionManagePage from "./pages/SessionManagePage";
 import Signup from "./pages/Signup";
 
 function App() {
@@ -37,6 +40,15 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/search/list" element={<SearchListPage />} />
         <Route path="/search/:id" element={<RunningDetailPage />} />
+        <Route path="/manage/:sessionId" element={<ManagePage />} />
+        <Route
+          path="/manage/:sessionId/attendance"
+          element={<SessionManagePage />}
+        />
+        <Route
+          path="/manage/:sessionId/hostevaluation"
+          element={<HostEvaluationPage />}
+        />
       </Routes>
     </BrowserRouter>
   );
