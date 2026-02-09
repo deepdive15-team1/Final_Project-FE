@@ -2,7 +2,7 @@ import { useState, useEffect, type KeyboardEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { searchSessions } from "../api/searchsession/searchSessionApi.mock";
+import { searchSessions } from "../api/searchsession/searchSessionApi.index";
 import back from "../assets/icon/back.svg";
 import searchIcon from "../assets/icon/search.svg";
 import Layout from "../components/Layout";
