@@ -54,10 +54,10 @@ export const MOCK_DETAILS: Record<number, SessionDetail> = {
     hostMannerTemp: 37.5,
     participants: ["철수", "영희", "민수"],
     routePolyline: [
-      { lat: 36.7945, lng: 127.1045 },
-      { lat: 36.7955, lng: 127.1055 },
-      { lat: 36.7935, lng: 127.1065 },
-      { lat: 36.7925, lng: 127.104 },
+      { y: 36.7945, x: 127.1045 },
+      { y: 36.7955, x: 127.1055 },
+      { y: 36.7935, x: 127.1065 },
+      { y: 36.7925, x: 127.104 },
     ],
   },
   2: {
@@ -66,9 +66,9 @@ export const MOCK_DETAILS: Record<number, SessionDetail> = {
     hostMannerTemp: 40.2,
     participants: ["영희", "지수"],
     routePolyline: [
-      { lat: 36.8015, lng: 127.1085 },
-      { lat: 36.802, lng: 127.109 },
-      { lat: 36.801, lng: 127.1095 },
+      { y: 36.8015, x: 127.1085 },
+      { y: 36.802, x: 127.109 },
+      { y: 36.801, x: 127.1095 },
     ],
   },
   3: {
@@ -77,13 +77,13 @@ export const MOCK_DETAILS: Record<number, SessionDetail> = {
     hostMannerTemp: 99.9,
     participants: ["철수", "민수", "동혁", "준호", "준수", "지호"],
     routePolyline: [
-      { lat: 36.79, lng: 127.102 },
-      { lat: 36.791, lng: 127.1025 },
-      { lat: 36.792, lng: 127.103 },
-      { lat: 36.793, lng: 127.104 },
-      { lat: 36.793, lng: 127.107 },
-      { lat: 36.793, lng: 127.109 },
-      { lat: 36.79, lng: 127.102 },
+      { y: 36.79, x: 127.102 },
+      { y: 36.791, x: 127.1025 },
+      { y: 36.792, x: 127.103 },
+      { y: 36.793, x: 127.104 },
+      { y: 36.793, x: 127.107 },
+      { y: 36.793, x: 127.109 },
+      { y: 36.79, x: 127.102 },
     ],
   },
 };
