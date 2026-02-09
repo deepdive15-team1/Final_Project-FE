@@ -11,10 +11,13 @@ export const getUserInfo = async (): Promise<UserInfoResponse> => {
   return data;
 };
 
-export const getCreatedRuns = async (): Promise<CreatedRunningResponse> => {
+export const getCreatedRuns = async (
+  limit?: number,
+): Promise<CreatedRunningResponse> => {
+  const params = limit ? { limit } : {};
   const { data } = await axiosInstance.get<CreatedRunningResponse>(
     "/users/me/runnings/mySession",
-    { params: { limit: 3 } },
+    { params },
   );
   return data;
 };

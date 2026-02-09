@@ -47,7 +47,7 @@ export default function MyPage() {
         setLoading(true);
         const [userRes, myRes, appliedRes, recentRes] = await Promise.all([
           MyPageApi.getUserInfo(),
-          MyPageApi.getCreatedRuns(),
+          MyPageApi.getCreatedRuns(3),
           MyPageApi.getAppliedRuns(),
           MyPageApi.getRecentRuns(),
         ]);
@@ -69,8 +69,22 @@ export default function MyPage() {
   if (!isLoggedIn) return null;
 
   // 관리 버튼 클릭 핸들러
-  const handleManageClick = (sessionId: number) => {
-    navigate(`/manage/${sessionId}`); // 해당 세션 ID로 이동
+  const handleManageClick = (sessionId: number, status: string) => {
+    if (
+      status === "FINISHED" ||
+      status === "DONE" ||
+      status === "IN_PROGRESS"
+    ) {
+      navigate(`/manage/${sessionId}/attendance`);
+    } else {
+      // 3. 아직 시작 전(OPEN, CLOSED)이라면 -> 신청자 관리 페이지(ManagePage)로 이동
+      navigate(`/manage/${sessionId}`);
+    }
+  };
+
+  const handleEvaluateClick = (sessionId: number) => {
+    // 호스트 평가 페이지로 이동
+    navigate(`/manage/${sessionId}/hostevaluation`);
   };
 
   const pageHeader = <Header title="마이페이지" />;
@@ -107,7 +121,7 @@ export default function MyPage() {
                   currentParticipants={run.currentParticipants}
                   capacity={run.capacity}
                   status={run.status}
-                  onClickManage={() => handleManageClick(run.id)}
+                  onClickManage={() => handleManageClick(run.id, run.status)}
                 />
               ))}
             </ListWrapper>
@@ -143,6 +157,7 @@ export default function MyPage() {
                   date={run.date}
                   title={run.title}
                   isCompleted={run.resultStatus === "DONE"}
+                  onClick={() => handleEvaluateClick(run.runningId)}
                 />
               ))}
             </ListWrapper>

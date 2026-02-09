@@ -31,7 +31,7 @@ export interface CreatedRunning {
   capacity: number;
   currentParticipants: number;
   genderPolicy: string;
-  status: "OPEN" | "CLOSED" | "DONE";
+  status: "OPEN" | "CLOSED" | "CANCELED" | "FINISHED";
   createdAt: string;
   updatedAt: string;
 }
