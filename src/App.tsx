@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import "./App.css";
+import ProtectedRoute from "./components/ProtectedRoute";
 import CreateSession from "./pages/CreateSession";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -17,8 +18,22 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Home />} />
-        <Route path="/create-session" element={<CreateSession />} />
-        <Route path="/my-page" element={<MyPage />} />
+        <Route
+          path="/create-session"
+          element={
+            <ProtectedRoute>
+              <CreateSession />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-page"
+          element={
+            <ProtectedRoute>
+              <MyPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/search/list" element={<SearchListPage />} />
         <Route path="/search/:id" element={<RunningDetailPage />} />
