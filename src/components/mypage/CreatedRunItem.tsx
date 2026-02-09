@@ -6,7 +6,7 @@ interface CreatedRunItemProps {
   title: string;
   currentParticipants: number;
   capacity: number;
-  status: "OPEN" | "CLOSED" | "DONE";
+  status: "OPEN" | "CLOSED" | "CANCELED" | "FINISHED";
   onClickManage: () => void;
 }
 
