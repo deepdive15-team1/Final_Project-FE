@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 
 import { getNearbyPlaceName } from "../api/kakaoLocal/kakaoLocalApi";
+import ResetIcon from "../assets/icon/reset.png";
 import Layout from "../components/Layout";
 import Header from "../components/common/header/Header";
 import { KaKaoMap } from "../components/common/kakaomap/KaKaoMap";
@@ -81,18 +82,31 @@ export default function CreateSession() {
 
   const routePath = routeNodes.length >= 2 ? routeNodes : undefined;
 
+  const handleResetRoute = useCallback(() => {
+    setRouteNodes([]);
+  }, []);
+
   return (
     <Layout header={pageHeader} scrollable={false}>
       <MapSheetWrapper>
         <KaKaoMap
           height="100%"
           showCurrentLocationMarker={true}
-          locationBtnBottom="620px"
+          locationBtnBottom="calc(100% - 54px)"
           isCreateMode={true}
           onMapClick={handleMapClick}
           routePath={routePath}
           markers={markers}
         />
+        <MapButtonOverlay>
+          <ResetRouteBtn
+            type="button"
+            onClick={handleResetRoute}
+            title="경로 리셋"
+          >
+            <img src={ResetIcon} alt="경로 리셋" />
+          </ResetRouteBtn>
+        </MapButtonOverlay>
         <SessionBottomSheet
           ref={bottomSheetRef}
           locationFormData={locationFormData}
@@ -107,4 +121,49 @@ const MapSheetWrapper = styled.div`
   width: 100%;
   height: 100%;
   min-height: 0;
+`;
+
+const MapButtonOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+
+  & > * {
+    pointer-events: auto;
+  }
+`;
+
+const ResetRouteBtn = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 70px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--color-main-light);
+  }
+
+  &:active {
+    background-color: var(--color-gray-200);
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+    display: block;
+  }
 `;

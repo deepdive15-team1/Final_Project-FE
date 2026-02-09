@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { login } from "../api/auth/authApi.index";
+import { AUTH_ERROR_KEY } from "../api/axiosInstance";
 import LockIcon from "../assets/icon/lock.svg?react";
 import UserIcon from "../assets/icon/my.svg?react";
 import LogoIcon from "../assets/logo.svg?react";
@@ -23,6 +24,20 @@ function validateLoginForm(fd: FormData): Record<string, string> {
   return next;
 }
 
+/** 401 리다이렉트 시 sessionStorage에 담긴 에러 메시지를 읽고 제거한 뒤 초기 에러 객체 반환 */
+function getInitialLoginError(): Record<string, string> {
+  try {
+    const authError = sessionStorage.getItem(AUTH_ERROR_KEY);
+    if (authError) {
+      sessionStorage.removeItem(AUTH_ERROR_KEY);
+      return { form: authError };
+    }
+  } catch {
+    // ignore
+  }
+  return {};
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const setUser = useAuthStore((state) => state.setUser);
@@ -31,7 +46,9 @@ export default function Login() {
   const userIcon = <UserIcon style={{ color: "var(--color-gray-600)" }} />;
   const lockIcon = <LockIcon style={{ color: "var(--color-gray-600)" }} />;
 
-  const [error, setError] = useState<Record<string, string>>({});
+  // 401 등으로 리다이렉트된 경우 세션 스토리지에 담긴 메시지를 초기값으로 사용
+  const [error, setError] =
+    useState<Record<string, string>>(getInitialLoginError);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

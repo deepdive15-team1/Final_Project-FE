@@ -1,4 +1,4 @@
-import { format, isSameDay } from "date-fns";
+import { format, isSameDay, startOfDay } from "date-fns";
 import { ko } from "date-fns/locale/ko";
 import { useState, useRef, useEffect } from "react";
 import DatePicker from "react-datepicker";
@@ -19,17 +19,22 @@ export default function DateTimePicker({
   name: string;
 }) {
   const calendarRef = useRef<HTMLDivElement>(null);
+  // 초기값: 현재 + 20분 이후, 10분 단위로 올림 (선택 가능한 최소 시간)
+  const getInitialDateTime = () => {
+    const t = Date.now() + 20 * 60 * 1000;
+    const intervalMs = 10 * 60 * 1000;
+    return new Date(Math.ceil(t / intervalMs) * intervalMs);
+  };
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(
-    new Date(),
+    getInitialDateTime,
   );
   const [isOpen, setIsOpen] = useState(false);
   const [openDirection, setOpenDirection] = useState<TOpenDirection>("below");
 
   const filterPassedTime: TFilterTime = (time) => {
-    const currentDate = new Date();
-    const selectedDate = new Date(time);
-
-    return currentDate.getTime() < selectedDate.getTime();
+    const now = Date.now();
+    const minAllowed = now + 20 * 60 * 1000; // 현재 시간 + 20분 이후만 선택 가능
+    return new Date(time).getTime() >= minAllowed;
   };
 
   const handleToggle = () => {
@@ -57,6 +62,7 @@ export default function DateTimePicker({
     <DatePicker
       className="date-picker"
       selected={selectedDateTime}
+      minDate={startOfDay(new Date())}
       onChange={(dates: Date | Date[] | null) => {
         const date = Array.isArray(dates) ? (dates[0] ?? null) : dates;
         const nextDate = date ?? new Date();
